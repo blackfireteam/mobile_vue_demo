@@ -47,9 +47,7 @@ service.interceptors.response.use(
       } else if (res && res.msg) {
         msg = res.msg;
       }
-      Toast.fail({
-        message: msg,
-      });
+      Toast(msg);
       return Promise.reject(res);
     }
   },

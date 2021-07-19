@@ -99,9 +99,8 @@ export default {
             router.push({ name: "chats" });
           })
           .catch((err) => {
-            loading.close();
             if (err?.msg) {
-              ctx.$toast(err?.msg);
+              ctx.$toast(err.msg);
             }
           });
       }

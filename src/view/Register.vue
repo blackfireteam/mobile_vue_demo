@@ -6,7 +6,7 @@
     @click-left="$router.go(-1)"
   />
   <div class="register">
-    <van-form @submit="onSubmit">
+    <van-form @submit="register">
       <van-cell-group inset>
         <van-field
           name="uploader"
@@ -68,28 +68,34 @@ export default {
       SecretId: "AKIDiARZwekKIK7f18alpjsqdOzmQAplexA5",
       SecretKey: "f7MLJ3YnoX2KLKBmBeAVeWNVLaYEmGYa",
     });
-    function onSubmit() {
+    function register() {
       const loading = ctx.$toast.loading({
         message: "提交中...",
         forbidClick: true,
         duration: 0,
         loadingType: "spinner",
       });
-      afterRead(fileList.value[0]).then((url) => {
-        ctx.$http.post("user/reg", {
-          uid: data.phone,
-          nick_name: data.nickname,
-          avatar: url,
-          verified: true, // 是否认证
-          gold: true, // 是否是gold
-          gold_exp_time: true, // gold过期时间
-          approved: true, // 是否是过审
-          disabled: true, // 是否disable
-          blocked: true, //	是否block
-          hold: true, // 是否im hold
-          deleted: true, // 是否im deleted
+      afterRead(fileList.value[0])
+        .then((url) => {
+          return ctx.$http.post("user/reg", {
+            uid: data.phone,
+            nick_name: data.nickname,
+            avatar: url,
+            verified: true, // 是否认证
+            gold: true, // 是否是gold
+            gold_exp_time: true, // gold过期时间
+            approved: true, // 是否是过审
+            disabled: true, // 是否disable
+            blocked: true, //	是否block
+            hold: true, // 是否im hold
+            deleted: true, // 是否im deleted
+          });
+        })
+        .then((res) => {
+          loading.close();
+          ctx.$toast.success("注册成功");
+          ctx.$router.push("login");
         });
-      });
     }
 
     const asyncValidator = (val) => {
@@ -97,32 +103,36 @@ export default {
     };
 
     function afterRead(fileObj) {
-      return Promise((resolve, reject) => {
-        fileObj.status = "uploading";
-        fileObj.message = "上传中...";
-        let file = fileObj.file;
-        // im_image
-        // im_video
-        // im_voice
-        let fileExtension = file.type.slice(6).toLowerCase();
-        let name = new Date().getTime();
-        cos.putObject(
-          {
-            Bucket: bucket /* 必须 */,
-            Region: region /* 存储桶所在地域，必须字段 */,
-            Key: `common/${name}.${fileExtension}` /* 必须 */,
-            Body: file,
-          },
-          (err, data) => {
-            if (data && data.statusCode === 200) {
-              fileObj.status = "success";
-              fileObj.message = "上传成功";
-              resolve("https://" + data.Location);
-            } else {
-              reject(err);
+      return new Promise((resolve, reject) => {
+        try {
+          fileObj.status = "uploading";
+          fileObj.message = "上传中...";
+          let file = fileObj.file;
+          // im_image
+          // im_video
+          // im_voice
+          let fileExtension = file.type.slice(6).toLowerCase();
+          let name = new Date().getTime();
+          cos.putObject(
+            {
+              Bucket: bucket /* 必须 */,
+              Region: region /* 存储桶所在地域，必须字段 */,
+              Key: `common/${name}.${fileExtension}` /* 必须 */,
+              Body: file,
+            },
+            (err, data) => {
+              if (data && data.statusCode === 200) {
+                fileObj.status = "success";
+                fileObj.message = "上传成功";
+                resolve("https://" + data.Location);
+              } else {
+                reject(err);
+              }
             }
-          }
-        );
+          );
+        } catch (err) {
+          reject(err);
+        }
       });
     }
     const beforeRead = (file) => {
@@ -141,7 +151,7 @@ export default {
     return {
       data,
       fileList,
-      onSubmit,
+      register,
       beforeRead,
       asyncValidator,
     };
