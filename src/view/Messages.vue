@@ -5,15 +5,24 @@
       left-arrow
       @click-left="$router.go(-1)"
     />
-    <div class="message_list" ref="msgRef" @scroll.passive="msgScroll">
-      <MsgItem
-        v-for="item in msgList"
-        :key="item.msgId"
-        :message="item"
-        :isSelf="item.fromUid != curChat.uid"
-        @revoke="revoke"
-        @resend="sendRef.resend(item)"
-      ></MsgItem>
+    <div class="message_list" ref="msgRef">
+      <van-list
+        v-model:loading="data.loading"
+        :finished="data.finished"
+        finished-text="没有更多了"
+        direction="up"
+        @load="onLoad"
+      >
+        <MsgItem
+          v-for="item in msgList"
+          :key="item.msgId"
+          :message="item"
+          :isSelf="item.fromUid != curChat.uid"
+          @preview="preview(item)"
+          @revoke="revoke"
+          @resend="sendRef.resend(item)"
+        ></MsgItem>
+      </van-list>
     </div>
     <MsgFooter
       :isHideMore="data.isHideMore"
@@ -26,6 +35,12 @@
       @hide="hideAll"
     />
   </div>
+  <van-image-preview
+    v-model:show="data.show"
+    :images="data.images"
+    :startPosition="data.imageListIndex"
+  >
+  </van-image-preview>
 </template>
 
 <script>
@@ -53,11 +68,16 @@ export default {
     const sendRef = ref("sendRef");
     const msgList = computed(() => store.state.msgList);
     const curChat = computed(() => store.state.curChat);
-    let msgMoreState = false;
     const data = reactive({
+      loading: false,
+      finished: false,
       isHideMore: true,
       isHideEmoji: true,
+      show: false,
+      imageListIndex: 0,
+      images: [],
     });
+    let imgMsgIdObj = {};
 
     watch(
       () => curChat.value,
@@ -70,6 +90,15 @@ export default {
     watch(
       () => msgList.value.length,
       (count, prevCount) => {
+        data.images = [];
+        if (count > 0) {
+          store.state.msgList.forEach((item) => {
+            if (item.type === ctx.$IM.TYPES.MSG_TYPE.Img) {
+              data.images.push(item.url);
+              imgMsgIdObj[item.msgId] = data.images.length - 1;
+            }
+          });
+        }
         if (prevCount > 0 && count > prevCount) {
           let el = msgRef.value;
           let scrollTop = el.scrollTop;
@@ -83,11 +112,16 @@ export default {
     );
 
     onMounted(() => {
-      initMessage();
+      // initMessage();
     });
 
+    function preview(item) {
+      if (item.type !== ctx.$IM.TYPES.MSG_TYPE.Img) return;
+      data.imageListIndex = imgMsgIdObj[item.msgId];
+      data.show = true;
+    }
+
     function initMessage(msgId) {
-      msgMoreState = true;
       ctx.$msim
         .getMessageList({
           conversationID: curChat.value.conversationID,
@@ -100,13 +134,14 @@ export default {
             if (!msgId) {
               scrollBottom();
             }
+          } else {
+            data.finished = true;
           }
+          data.loading = false;
         })
         .catch((err) => {
-          return ctx.$toast.fail(err?.msg || err);
-        })
-        .finally(() => {
-          msgMoreState = false;
+          data.loading = false;
+          return ctx.$toast(err?.msg || err);
         });
     }
 
@@ -121,7 +156,7 @@ export default {
           return ctx.$toast.success("撤回成功");
         })
         .catch((err) => {
-          return ctx.$toast.fail(err?.msg || err);
+          return ctx.$toast(err?.msg || err);
         });
     }
 
@@ -130,19 +165,12 @@ export default {
         msgRef.value.scrollTop = msgRef.value.scrollHeight;
       });
     }
-    function msgScroll() {
-      if (msgMoreState) return;
-      let el = msgRef.value;
-      let scrollTop = el.scrollTop;
-      let clientHeight = el.clientHeight;
-      let heigth = el.scrollHeight;
-      if (scrollTop < 20 && heigth > clientHeight) {
-        let msgId;
-        if (msgList.value && msgList.value.length > 0) {
-          msgId = msgList.value[0].msgId;
-          initMessage(msgId);
-        }
+    function onLoad() {
+      let msgId;
+      if (msgList.value && msgList.value.length > 0) {
+        msgId = msgList.value[0].msgId;
       }
+      initMessage(msgId);
     }
     function hideAll() {
       if (!data.isHideMore) data.isHideMore = true;
@@ -164,7 +192,8 @@ export default {
       showEmoji,
       hideAll,
       revoke,
-      msgScroll,
+      onLoad,
+      preview,
       scrollBottom,
       curChat: curChat,
       msgList: msgList,
@@ -186,7 +215,7 @@ export default {
 .message_list {
   width: 100%;
   box-sizing: border-box;
-  overflow-y: scroll;
+  overflow: auto;
   padding: 0 10px;
   height: calc(100% - 50px);
 }

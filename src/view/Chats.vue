@@ -1,71 +1,32 @@
 <template>
   <div class="chat_wrapper">
     <van-nav-bar class="shadow_bottom" title="会话列表" />
-    <div class="chat_list" @scroll.passive="chatScroll">
-      <van-swipe-cell
-        class="goods_card"
-        :key="item.conversationID"
-        v-for="item in chatList"
-      >
-        <ChatItem @click="chatChange(item)" :chat="item"></ChatItem>
-        <template #right>
-          <van-button
-            text="删除"
-            type="danger"
-            square
-            @click="deleteChat(item)"
-            class="delete_button"
-          />
-        </template>
-      </van-swipe-cell>
-      <van-swipe-cell
-        class="goods_card"
-        :key="item.conversationID"
-        v-for="item in chatList"
-      >
-        <ChatItem @click="chatChange(item)" :chat="item"></ChatItem>
-        <template #right>
-          <van-button
-            text="删除"
-            type="danger"
-            square
-            @click="deleteChat(item)"
-            class="delete_button"
-          />
-        </template>
-      </van-swipe-cell>
-      <van-swipe-cell
-        class="goods_card"
-        :key="item.conversationID"
-        v-for="item in chatList"
-      >
-        <ChatItem @click="chatChange(item)" :chat="item"></ChatItem>
-        <template #right>
-          <van-button
-            text="删除"
-            type="danger"
-            square
-            @click="deleteChat(item)"
-            class="delete_button"
-          />
-        </template>
-      </van-swipe-cell>
-      <van-swipe-cell
-        class="goods_card"
-        :key="item.conversationID"
-        v-for="item in chatList"
-      >
-        <ChatItem @click="chatChange(item)" :chat="item"></ChatItem>
-        <template #right>
-          <van-button
-            text="删除"
-            type="danger"
-            square
-            @click="deleteChat(item)"
-            class="delete_button"
-          />
-        </template>
-      </van-swipe-cell>
+    <div class="chat_list">
+      <van-pull-refresh v-model="data.refreshing" @refresh="onRefresh">
+        <van-list
+          v-model:loading="data.loading"
+          :finished="data.finished"
+          finished-text="没有更多了"
+          @load="onLoad"
+        >
+          <van-swipe-cell
+            class="goods_card"
+            :key="item.conversationID"
+            v-for="item in chatList"
+          >
+            <ChatItem @click="chatChange(item)" :chat="item"></ChatItem>
+            <template #right>
+              <van-button
+                text="删除"
+                type="danger"
+                square
+                @click="deleteChat(item)"
+                class="delete_button"
+              />
+            </template>
+          </van-swipe-cell>
+        </van-list>
+      </van-pull-refresh>
     </div>
   </div>
 </template>
@@ -85,14 +46,22 @@ export default {
     const chatList = computed(() => store.state.chatList);
     const connState = computed(() => store.state.connState);
     const data = reactive({
-      dialogVisible: false,
+      loading: false,
+      finished: false,
+      refreshing: false,
       userId: null,
     });
     const ctx = getCurrentInstance().appContext.config.globalProperties;
     onMounted(() => {
       store.commit("clearChats");
-      initChat();
     });
+
+    function onRefresh() {
+      data.finished = false;
+      data.loading = true;
+      console.log(data.loading);
+      onLoad();
+    }
 
     function initChat(conversationID) {
       ctx.$msim
@@ -103,24 +72,28 @@ export default {
           let chats = res.data.chats;
           if (chats.length > 0) {
             store.commit("addChats", chats, true);
+          } else {
+            data.finished = true;
           }
+          data.loading = false;
         })
         .catch((err) => {
-          return ctx.$toast.fail(err?.msg || err);
+          data.loading = false;
+          return ctx.$toast(err?.msg || err);
         });
     }
 
-    function chatScroll(evt) {
-      let scrollTop = evt.target.scrollTop;
-      let clientHeight = evt.target.clientHeight;
-      let heigth = evt.target.scrollHeight;
-      let list = chatList.value;
-      if (scrollTop + clientHeight >= heigth) {
-        if (list && list.length > 0) {
-          let conversationID = list[list.length - 1].conversationID;
-          initChat(conversationID);
-        }
+    function onLoad() {
+      if (data.refreshing) {
+        store.commit("clearChats");
+        data.refreshing = false;
       }
+      let conversationID;
+      let list = chatList.value;
+      if (list.length > 0) {
+        conversationID = list[list.length - 1].conversationID;
+      }
+      initChat(conversationID);
     }
 
     function chatChange(chat) {
@@ -144,34 +117,13 @@ export default {
           return ctx.$toast.success(`删除会话[${chat.conversationID}]成功`);
         })
         .catch((err) => {
-          return ctx.$toast.fail(err?.msg || err);
+          return ctx.$toast(err?.msg || err);
         });
-    }
-    function contact() {
-      if (!data.userId || data.userId == store.state.curUserId) {
-        cancel();
-        return;
-      }
-      let chat = chatList.value.find((chatItem) => chatItem.uid == data.userId);
-      if (!chat) {
-        chat = {
-          conversationID: "C2C_" + data.userId,
-          uid: parseInt(data.userId),
-        };
-        store.commit("addChat", chat);
-      }
-      store.commit("changeChat", chat);
-      cancel();
-    }
-    function cancel() {
-      data.userId = null;
-      data.dialogVisible = false;
     }
     return {
       data,
-      cancel,
-      contact,
-      chatScroll,
+      onLoad,
+      onRefresh,
       chatChange,
       deleteChat,
       chatList: chatList,

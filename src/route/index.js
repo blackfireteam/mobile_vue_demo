@@ -1,5 +1,6 @@
 import { createRouter, createWebHashHistory } from 'vue-router'
 import Login from '../view/Login.vue'
+import Register from '../view/Register.vue'
 import Layout from '../view/Layout.vue'
 import Chats from '../view/Chats.vue'
 import Search from '../view/Search.vue'
@@ -7,6 +8,7 @@ import My from '../view/My.vue'
 import Messages from '../view/Messages.vue'
 
 const routerHistory = createWebHashHistory()
+
 const router = createRouter({
   history: routerHistory,
   routes: [
@@ -15,6 +17,11 @@ const router = createRouter({
       path: '/',
       name: 'login',
       component: Login,
+    },
+    {
+      path: '/register',
+      name: 'register',
+      component: Register,
     },
     {
       path: '/home',
@@ -53,7 +60,7 @@ const router = createRouter({
 
 router.beforeEach((to, from, next) => {
   let userId = window.localStorage.getItem("userId") || null;
-  if (!userId && to.name !== 'login') {
+  if (!userId && to.name !== 'login' && to.name !== 'register') {
     next({ name: "login" })
   } else {
     next()

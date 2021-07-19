@@ -35,7 +35,9 @@
         <div class="more_item">
           <van-uploader
             accept="image/*"
-            :after-read="selectFile"
+            :after-read="afterRead"
+            :before-read="beforeRead"
+            :max-count="1"
             @click.stop=""
           >
             <van-icon name="photo" />
@@ -166,23 +168,27 @@ export default {
         });
     }
 
+    const beforeRead = (file) => {
+      if (
+        file.type === "image/jpg" ||
+        file.type === "image/jpeg" ||
+        file.type === "image/gif" ||
+        file.type === "image/png"
+      ) {
+        return true;
+      } else {
+        ctx.$toast("目前只支持jpg,jpeg,png,gif格式文件");
+        return false;
+      }
+    };
+
     // 选择图片
-    function selectFile(fileObj) {
+    function afterRead(fileObj) {
       let file = fileObj.file;
       // im_image
       // im_video
       // im_voice
-      let fileExtension = file.name.split(".").pop().toLowerCase();
-      if (
-        fileExtension !== "jpg" &&
-        fileExtension !== "jpeg" &&
-        fileExtension !== "png" &&
-        fileExtension != "gif"
-      ) {
-        return ctx.$message.error({
-          message: "目前只支持jpe,jpeg,png,gif格式文件",
-        });
-      }
+      let fileExtension = file.type.slice(6).toLowerCase();
       let reader = new FileReader();
       reader.readAsDataURL(file);
       reader.onload = function (e) {
@@ -231,7 +237,8 @@ export default {
       selectEmoji,
       sendText,
       resend,
-      selectFile,
+      afterRead,
+      beforeRead,
     };
   },
 };

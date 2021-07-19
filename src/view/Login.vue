@@ -1,6 +1,11 @@
 <template>
   <div class="login_wrapper">
-    <img src="@/assets/img/login_bg.jpg" class="bg" alt="" />
+    <van-image
+      class="bg"
+      fit="cover"
+      lazy-load
+      :src="require('@/assets/img/login_bg.jpg')"
+    />
     <div class="login_cont">
       <div class="row_div" style="width: 100%; height: 10px">
         <div class="color_block_1"></div>
@@ -20,9 +25,14 @@
             label-width="1.5rem"
             label="手机号"
           />
-          <van-cell>
+          <van-cell :border="false">
             <van-button type="primary" block size="small" @click="login"
               >登录</van-button
+            >
+          </van-cell>
+          <van-cell>
+            <van-button type="default" block size="small" to="/register"
+              >注册</van-button
             >
           </van-cell>
         </van-cell-group>
@@ -35,7 +45,6 @@
 import { getCurrentInstance, onMounted, reactive } from "vue";
 import { useStore } from "vuex";
 import { useRouter } from "vue-router";
-import sha1 from "js-sha1";
 
 export default {
   setup() {
@@ -61,7 +70,7 @@ export default {
         return;
       }
       if (!data.userId) {
-        return ctx.$toast.fail("请输入手机号码");
+        return ctx.$toast("请输入手机号码");
       }
       if (!store.state.curUserId) {
         const loading = ctx.$toast.loading({
@@ -70,25 +79,11 @@ export default {
           duration: 0,
           loadingType: "spinner",
         });
-        let secret = "asfasdasd123";
-        let nonce = Math.ceil(Math.random() * 10e9);
-        let timestamp = new Date().getTime() * 1000;
-        let sig = sha1(secret + nonce + timestamp);
         ctx.$http
-          .post(
-            "user/iminit",
-            {
-              uid: data.userId,
-              ctype: 1,
-            },
-            {
-              headers: {
-                nonce: nonce,
-                timestamp: timestamp,
-                sig: sig,
-              },
-            }
-          )
+          .post("user/iminit", {
+            uid: data.userId,
+            ctype: 1,
+          })
           .then((res) => {
             return ctx.$msim.login({
               wsUrl: res.data.url,
@@ -106,7 +101,7 @@ export default {
           .catch((err) => {
             loading.close();
             if (err?.msg) {
-              ctx.$toast.fail(err?.msg);
+              ctx.$toast(err?.msg);
             }
           });
       }
@@ -136,7 +131,6 @@ export default {
   right: 0;
   width: 100%;
   height: 100%;
-  z-index: -1;
 }
 
 .login_cont {
@@ -149,6 +143,8 @@ export default {
   color: #000;
   border-radius: 5px;
   box-shadow: var(--shadow);
+  position: relative;
+  z-index: 10;
 }
 
 .row_div {

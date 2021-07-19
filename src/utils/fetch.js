@@ -1,5 +1,6 @@
 import axios from "axios";
 import { Toast } from "vant";
+import sha1 from "js-sha1";
 const timeout = 5000;
 let baseURL = "https://im.ekfree.com:18788/";
 const service = axios.create({
@@ -13,6 +14,13 @@ const service = axios.create({
 // 设置axios 请求拦截
 service.interceptors.request.use(
   (config) => {
+    let secret = "asfasdasd123";
+    let nonce = Math.ceil(Math.random() * 10e9);
+    let timestamp = new Date().getTime() * 1000;
+    let sig = sha1(secret + nonce + timestamp);
+    config.headers['nonce'] = nonce;
+    config.headers['timestamp'] = timestamp;
+    config.headers['sig'] = sig;
     // config.headers["X-Requested-With"] = "XMLHttpRequest";
     // config["crossDomain"] = true;
     return config;

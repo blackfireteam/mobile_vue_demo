@@ -6,7 +6,6 @@
 import { getCurrentInstance, onMounted } from "vue";
 import { useStore } from "vuex";
 import { useRouter } from "vue-router";
-
 export default {
   name: "App",
   setup() {
@@ -119,6 +118,7 @@ html {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   height: 100%;
+  background-color: #eee;
 }
 #app ::-webkit-scrollbar {
   width: 3px;

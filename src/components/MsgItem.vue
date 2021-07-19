@@ -43,6 +43,7 @@
             <img
               v-else-if="message.type === 1"
               class="image_element"
+              @click="$emit('preview')"
               :src="message.url"
             />
             <span v-else-if="message.type === 2" class="text_box">[音频]</span>
