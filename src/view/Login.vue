@@ -79,22 +79,31 @@ export default {
           duration: 0,
           loadingType: "spinner",
         });
-        ctx.$http
-          .post("user/iminit", {
-            uid: data.userId,
-            ctype: 1,
-          })
-          .then((res) => {
-            return ctx.$msim.login({
-              wsUrl: res.data.url,
-              imToken: res.data.token,
-              // wsUrl: wsURL,
-              // imToken: "testImToken",
-              // testId: data.userId,
-            });
+        // ctx.$http
+        //   .post("user/iminit", {
+        //     uid: data.userId,
+        //     ctype: 1,
+        //   })
+        //   .then((res) => {
+        //     return ctx.$msim.login({
+        //       wsUrl: res.data.url,
+        //       imToken: res.data.token,
+        //       // wsUrl: wsURL,
+        //       // imToken: "testImToken",
+        //       // testId: data.userId,
+        //     });
+        //   })
+        ctx.$msim
+          .login({
+            // wsUrl: res.data.url,
+            // imToken: res.data.token,
+            wsUrl: wsURL,
+            imToken: "testImToken",
+            testId: data.userId,
           })
           .then(() => {
             loading.close();
+            window.localStorage.setItem("userId", data.userId);
             store.commit("setUserId", data.userId);
             router.push({ name: "chats" });
           })

@@ -44,7 +44,6 @@ export default {
     const store = useStore();
     const router = useRouter();
     const chatList = computed(() => store.state.chatList);
-    const connState = computed(() => store.state.connState);
     const data = reactive({
       loading: false,
       finished: false,
@@ -59,7 +58,6 @@ export default {
     function onRefresh() {
       data.finished = false;
       data.loading = true;
-      console.log(data.loading);
       onLoad();
     }
 
@@ -127,7 +125,6 @@ export default {
       chatChange,
       deleteChat,
       chatList: chatList,
-      connState: connState,
     };
   },
 };

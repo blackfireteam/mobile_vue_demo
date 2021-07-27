@@ -32,17 +32,19 @@
     </div>
     <div class="footer_more more_wrapper" :class="{ is_head_more: isHideMore }">
       <div class="more_cont">
-        <div class="more_item">
-          <van-uploader
-            accept="image/*"
-            :after-read="afterRead"
-            :before-read="beforeRead"
-            :max-count="1"
-            @click.stop=""
-          >
-            <van-icon name="photo" />
-          </van-uploader>
-        </div>
+        <van-grid :gutter="10">
+          <van-grid-item>
+            <van-uploader
+              accept="image/*"
+              :after-read="afterRead"
+              :before-read="beforeRead"
+              :max-count="1"
+              @click.stop=""
+            >
+              <van-icon class="more_icon" name="photo" />
+            </van-uploader>
+          </van-grid-item>
+        </van-grid>
       </div>
     </div>
     <div
@@ -50,14 +52,16 @@
       :class="{ is_head_more: isHideEmoji }"
     >
       <div class="more_cont">
-        <img
-          :src="require(`@/assets/emoji/${item.url}`)"
-          class="emoji_item"
-          @click.stop="selectEmoji(item)"
-          :title="item.key"
-          v-for="item in emojiJson"
-          :key="item.key"
-        />
+        <van-grid :gutter="10" column-num="8">
+          <van-grid-item
+            @click.stop="selectEmoji(item)"
+            :title="item.key"
+            v-for="item in emojiJson"
+            :key="item.key"
+            :icon="require(`@/assets/emoji/${item.url}`)"
+          >
+          </van-grid-item>
+        </van-grid>
       </div>
       <div class="clear_btn" @click.stop="clearMsg">
         <van-icon name="cross" />
@@ -115,7 +119,7 @@ export default {
     function sendText() {
       if (!data.msgText.trim()) {
         data.msgText = "";
-        return ctx.$message.info("不能发空消息");
+        return ctx.$toast("不能发空消息");
       }
       let msgObj = ctx.$msim.createTextMessage({
         to: props.curChat.uid,
@@ -144,7 +148,7 @@ export default {
           nextTick(() => {
             oldMsg.sendStatus =
               ctx.$IM.TYPES.SEND_STATE.BFIM_MSG_STATUS_SEND_FAIL;
-            return ctx.$message.error({
+            return ctx.$toast({
               message: err?.msg || err,
             });
           });
@@ -162,7 +166,7 @@ export default {
         })
         .catch((err) => {
           msgObj.sendStatus = 2;
-          return ctx.$message.error({
+          return ctx.$toast({
             message: err?.msg || err,
           });
         });
@@ -252,7 +256,8 @@ export default {
   overflow: auto;
 }
 .more_cont {
-  padding: 5vw;
+  flex: 1;
+  padding: 20px 10px;
 }
 
 .footer_more.is_head_more {
@@ -265,19 +270,19 @@ export default {
   align-items: start;
 }
 
-.more_item {
+.more_icon {
   font-size: 40px;
   color: #2880e6;
-  padding: 5px 10px;
-  border-radius: 5px;
-  background-color: #fff;
 }
 
 .emoji_wrapper {
   position: relative;
+  --van-grid-item-content-padding: 0;
+  --van-grid-item-content-background-color: transparent;
 }
+
 .clear_btn {
-  position: absolute;
+  position: fixed;
   right: 10px;
   bottom: 10px;
   padding: 5px 15px;
@@ -288,11 +293,8 @@ export default {
   border-radius: 5px;
   box-shadow: var(--shadow);
 }
-
-.emoji_item {
-  width: 9vw;
-  padding-right: 2vw;
-  padding-bottom: 2vw;
+.footer_more.is_head_more .clear_btn {
+  position: absolute;
 }
 
 .footer_input {

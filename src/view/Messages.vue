@@ -54,6 +54,7 @@ import {
   reactive,
 } from "vue";
 import { useStore } from "vuex";
+import { useRoute } from "vue-router";
 import MsgItem from "@/components/MsgItem.vue";
 import MsgFooter from "@/components/MsgFooter.vue";
 export default {
@@ -61,13 +62,19 @@ export default {
     MsgItem,
     MsgFooter,
   },
-  setup(props) {
+  setup(props, context) {
     const store = useStore();
     const ctx = getCurrentInstance().appContext.config.globalProperties;
     const msgRef = ref("msgList");
     const sendRef = ref("sendRef");
+    const route = useRoute();
     const msgList = computed(() => store.state.msgList);
     const curChat = computed(() => store.state.curChat);
+    if (curChat.value === null) {
+      store.commit("changeChat", {
+        conversationID: route.params.id,
+      });
+    }
     const data = reactive({
       loading: false,
       finished: false,
@@ -101,11 +108,13 @@ export default {
         }
         if (prevCount > 0 && count > prevCount) {
           let el = msgRef.value;
-          let scrollTop = el.scrollTop;
-          let clientHeight = el.clientHeight;
-          let heigth = el.scrollHeight;
-          if (scrollTop > 0 && heigth - 100 < clientHeight + scrollTop) {
-            scrollBottom();
+          if (el) {
+            let scrollTop = el.scrollTop;
+            let clientHeight = el.clientHeight;
+            let heigth = el.scrollHeight;
+            if (scrollTop > 0 && heigth - 100 < clientHeight + scrollTop) {
+              scrollBottom();
+            }
           }
         }
       }
@@ -162,7 +171,9 @@ export default {
 
     function scrollBottom() {
       nextTick(() => {
-        msgRef.value.scrollTop = msgRef.value.scrollHeight;
+        if (msgRef.value) {
+          msgRef.value.scrollTop = msgRef.value.scrollHeight;
+        }
       });
     }
     function onLoad() {

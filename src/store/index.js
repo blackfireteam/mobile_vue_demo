@@ -6,7 +6,6 @@ const store = createStore({
       chatList: [], // 会话列表
       msgList: [], // 消息列表
       curChat: null, // 当前会话
-      connState: null,
     }
   },
   mutations: {
@@ -15,10 +14,6 @@ const store = createStore({
       state.chatList = [];
       state.msgList = [];
       state.curChat = null;
-      state.connState = null
-    },
-    setConnState(state, val) {
-      state.connState = val;
     },
     setUserId(state, userId) {
       state.curUserId = userId;

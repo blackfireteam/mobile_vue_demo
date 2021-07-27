@@ -18,18 +18,37 @@
       <div class="col_2">
         <div class="content_wrapper">
           <div class="message_status">
-            <i v-if="message.sendStatus === 0" class="el-icon-loading"></i>
+            <van-button
+              v-if="
+                message.sendStatus ===
+                $IM.TYPES.SEND_STATE.BFIM_MSG_STATUS_SENDING
+              "
+              loading
+              class="loading_icon"
+              type="default"
+              size="small"
+              loading-type="spinner"
+            />
             <span
-              v-else-if="isSelf && message.sendStatus === 1"
+              v-else-if="
+                isSelf &&
+                message.sendStatus ===
+                  $IM.TYPES.SEND_STATE.BFIM_MSG_STATUS_SEND_SUCC
+              "
               class="revoke_btn"
               @click.stop="$emit('revoke', message)"
               >撤回</span
             >
-            <i
-              v-else-if="message.sendStatus === 2"
-              class="el-icon-warning send_faild"
+            <van-icon
+              v-else-if="
+                message.sendStatus ===
+                $IM.TYPES.SEND_STATE.BFIM_MSG_STATUS_SEND_FAIL
+              "
+              name="warning"
+              color="#f35f5f"
               @click.stop="$emit('resend')"
-            ></i>
+              size="25"
+            />
           </div>
           <div
             :class="isSelf ? 'message_send' : 'message_received'"
@@ -170,10 +189,8 @@ export default {
 }
 .message_status {
   margin-right: 10px;
-}
-.send_faild {
-  color: #f35f5f;
-  cursor: pointer;
+  display: flex;
+  align-items: center;
 }
 .revoke_btn {
   font-size: 12px;
@@ -268,5 +285,9 @@ export default {
 }
 .col_3 {
   width: 30px;
+}
+.loading_icon {
+  background-color: transparent;
+  border: 0;
 }
 </style>

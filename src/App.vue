@@ -1,19 +1,23 @@
 <template>
-  <router-view />
+  <router-view v-if="data.isInit" />
 </template>
 
 <script>
-import { getCurrentInstance, onMounted } from "vue";
+import { getCurrentInstance, onMounted, reactive } from "vue";
 import { useStore } from "vuex";
-import { useRouter } from "vue-router";
+import { useRouter, useRoute } from "vue-router";
 export default {
   name: "App",
   setup() {
-    const { $IM, $msim } =
+    const { $IM, $msim, $toast } =
       getCurrentInstance().appContext.config.globalProperties;
     const store = useStore();
     const router = useRouter();
-
+    const route = useRoute();
+    const data = reactive({
+      isInit: false,
+    });
+    let wsURL = "wss://im.ekfree.com:18988";
     onMounted(() => {
       initListener();
     });
@@ -28,13 +32,40 @@ export default {
       $msim.on($IM.EVENT.MESSAGE_REVOKED, revoked);
       $msim.on($IM.EVENT.CONVERSATION_LIST_UPDATED, updateChats);
       let userId = window.localStorage.getItem("userId") || null;
-      store.commit("setUserId", userId);
+      if (userId && route.name !== "login") {
+        data.isInit = false;
+        const loading = $toast.loading({
+          message: "登陆中...",
+          forbidClick: true,
+          duration: 0,
+          loadingType: "spinner",
+        });
+        $msim
+          .login({
+            // wsUrl: res.data.url,
+            // imToken: res.data.token,
+            wsUrl: wsURL,
+            imToken: "testImToken",
+            testId: userId,
+          })
+          .then((loginRes) => {
+            loading.close();
+            store.commit("setUserId", userId);
+            data.isInit = true;
+          })
+          .catch((err) => {
+            if (err?.msg) {
+              $toast(err.msg);
+            }
+          });
+      } else {
+        data.isInit = true;
+      }
     }
 
     // 网络状态监听
     function wsChange(options) {
       console.log("连接状态变更", options);
-      store.commit("setConnState", options.data.state);
     }
     // 登录
     function login(options) {
@@ -42,12 +73,15 @@ export default {
       let userId = window.localStorage.getItem("userId");
       if (userId) {
         store.commit("setUserId", userId);
-        router.push({ name: "home" });
+        if (route.name === "login") {
+          router.push({ name: "home" });
+        }
       }
     }
     // 退出
     function logout(options) {
       console.log(options);
+      window.localStorage.removeItem("userId");
       store.commit("clear");
       router.push({ name: "login" });
     }
@@ -83,7 +117,7 @@ export default {
       store.commit("updateChats", options.data);
     }
 
-    return {};
+    return { data };
   },
 };
 </script>
