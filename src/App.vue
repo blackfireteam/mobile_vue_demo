@@ -88,12 +88,14 @@ export default {
     // 被踢
     function kickedOut(options) {
       console.log(options);
+      window.localStorage.removeItem("userId");
       store.commit("clear");
       router.push({ name: "login" });
     }
     // token失效
     function tokenNotFound(options) {
       console.log(options);
+      window.localStorage.removeItem("userId");
       store.commit("clear");
       router.push({ name: "login" });
     }

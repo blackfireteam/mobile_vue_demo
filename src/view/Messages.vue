@@ -1,7 +1,7 @@
 <template>
   <div class="content" @click="hideAll">
     <van-nav-bar
-      :title="curChat.conversationID"
+      :title="curChat?.conversationID"
       left-arrow
       @click-left="$router.go(-1)"
     />
@@ -17,7 +17,7 @@
           v-for="item in msgList"
           :key="item.msgId"
           :message="item"
-          :isSelf="item.fromUid != curChat.uid"
+          :isSelf="item.fromUid != curChat?.uid"
           @preview="preview(item)"
           @revoke="revoke"
           @resend="sendRef.resend(item)"
@@ -89,7 +89,7 @@ export default {
     watch(
       () => curChat.value,
       (count, prevCount) => {
-        if (count?.conversationID !== prevCount?.conversationID) {
+        if (count && count.conversationID !== prevCount?.conversationID) {
           initMessage();
         }
       }
