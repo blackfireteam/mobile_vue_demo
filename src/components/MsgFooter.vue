@@ -39,7 +39,6 @@
               :after-read="afterRead"
               :before-read="beforeRead"
               :max-count="1"
-              @click.stop=""
             >
               <van-icon class="more_icon" name="photo" />
             </van-uploader>
@@ -63,7 +62,7 @@
           </van-grid-item>
         </van-grid>
       </div>
-      <div class="clear_btn" @click.stop="clearMsg">
+      <div class="clear_btn" @click.stop="clearMsg()">
         <van-icon name="cross" />
       </div>
     </div>
@@ -96,18 +95,37 @@ export default {
       SecretKey: "f7MLJ3YnoX2KLKBmBeAVeWNVLaYEmGYa",
     });
 
-    function clearMsg() {
+    function clearMsg(e) {
+      let strEnd = data.msgText.length;
+      if (e) {
+        strEnd = e.target.selectionEnd;
+      }
+      if (strEnd === 0) return;
       let temp = data.msgText;
-      if (data.msgText.slice(-1) === "]") {
-        let left = data.msgText.lastIndexOf("[");
+      let curKey = data.msgText.slice(strEnd - 1, strEnd);
+      if (curKey === "]") {
+        let left = data.msgText.lastIndexOf("[", strEnd - 1);
         if (left > -1) {
-          let img = temp.slice(left);
+          let img = temp.slice(left, strEnd);
           if (emojiMap[img]) {
-            return (data.msgText = data.msgText.slice(0, left));
+            data.msgText =
+              data.msgText.slice(0, left) + data.msgText.slice(strEnd);
+            if (e) {
+              nextTick(() => {
+                e.target.setSelectionRange(left - 1, left - 1);
+              });
+            }
+            return;
           }
         }
       }
-      data.msgText = data.msgText.slice(0, -1);
+      data.msgText =
+        data.msgText.slice(0, strEnd - 1) + data.msgText.slice(strEnd);
+      if (e) {
+        nextTick(() => {
+          e.target.setSelectionRange(strEnd - 1, strEnd - 1);
+        });
+      }
     }
 
     // 选择表情

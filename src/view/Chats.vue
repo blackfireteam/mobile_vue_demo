@@ -48,7 +48,6 @@ export default {
       loading: false,
       finished: false,
       refreshing: false,
-      userId: null,
     });
     const ctx = getCurrentInstance().appContext.config.globalProperties;
     onMounted(() => {
@@ -69,7 +68,7 @@ export default {
         .then((res) => {
           let chats = res.data.chats;
           if (chats.length > 0) {
-            store.commit("addChats", chats, true);
+            store.commit("addChats", chats);
           } else {
             data.finished = true;
           }
@@ -97,6 +96,9 @@ export default {
     function chatChange(chat) {
       if (chat && chat.conversationID) {
         // TODO怎么判断已读
+        if (chat.unread > 0) {
+          setRead(chat.conversationID);
+        }
         store.commit("changeChat", chat);
         router.push("/messages/" + chat.conversationID);
       }
