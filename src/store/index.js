@@ -5,7 +5,7 @@ const store = createStore({
       curUserId: null, // 当前登录用户ID
       chatList: [], // 会话列表
       msgList: [], // 消息列表
-      curChat: null, // 当前会话
+      curConversationID: null, // 当前会话ID
     }
   },
   mutations: {
@@ -13,7 +13,7 @@ const store = createStore({
       state.curUserId = null;
       state.chatList = [];
       state.msgList = [];
-      state.curChat = null;
+      state.curConversationID = null;
     },
     setUserId(state, userId) {
       state.curUserId = userId;
@@ -27,8 +27,8 @@ const store = createStore({
     addChat(state, chat) {
       state.chatList.unshift(chat);
     },
-    changeChat(state, chat) {
-      state.curChat = chat;
+    changeChat(state, conversationID) {
+      state.curConversationID = conversationID;
       state.msgList = [];
     },
     updateChats(state, chats) {
@@ -37,8 +37,8 @@ const store = createStore({
           // 如果是删除会话
           state.chatList = state.chatList.filter(
             (chat) => {
-              if (newChat.conversationID === state.curChat.conversationID) {
-                state.curChat = null;
+              if (newChat.conversationID === state.curConversationID) {
+                state.curConversationID = null;
               }
               return chat.conversationID !== newChat.conversationID;
             }
@@ -56,8 +56,8 @@ const store = createStore({
       state.chatList.sort((pre, next) => {
         return next.showMsgTime - pre.showMsgTime;
       });
-      if (!state.curChat && state.chatList.length) {
-        state.curChat = state.chatList[0];
+      if (!state.curConversationID && state.chatList.length) {
+        state.curConversationID = state.chatList[0].conversationID;
         state.msgList = [];
       }
     },
@@ -68,9 +68,9 @@ const store = createStore({
       state.msgList.push(msg);
     },
     updateMsgs(state, messages) {
-      if (!state.curChat) return;
+      if (!state.curConversationID) return;
       messages.forEach((newMsg) => {
-        if (newMsg.conversationID === state.curChat.conversationID) {
+        if (newMsg.conversationID === state.curConversationID) {
           let msg = state.msgList.find(
             (msgItem) => msgItem.onlyId === newMsg.onlyId
           );
@@ -83,10 +83,10 @@ const store = createStore({
       });
     },
     revokeMsgs(state, messages) {
-      if (!state.curChat) return;
+      if (!state.curConversationID) return;
       messages.forEach((newMsg) => {
         console.log(412421)
-        if (newMsg.conversationID === state.curChat.conversationID) {
+        if (newMsg.conversationID === state.curConversationID) {
           let msg = state.msgList.find(
             (msgItem) => msgItem.msgId === newMsg.msgId
           );

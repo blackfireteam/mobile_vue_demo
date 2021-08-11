@@ -62,8 +62,8 @@ export default {
       }
     });
 
-    let wsURL = "wss://im.ekfree.com:18988";
-    // let wsURL = "ws://192.168.50.251:18988";
+    // let wsURL = "wss://im.ekfree.com:18988";
+    // let wsURL = "ws://192.168.50.97:18988";
     function login() {
       if (data.isLogoin) {
         router.push({ name: "home" });
@@ -79,27 +79,19 @@ export default {
           duration: 0,
           loadingType: "spinner",
         });
-        // ctx.$http
-        //   .post("user/iminit", {
-        //     uid: data.userId,
-        //     ctype: 1,
-        //   })
-        //   .then((res) => {
-        //     return ctx.$msim.login({
-        //       wsUrl: res.data.url,
-        //       imToken: res.data.token,
-        //       // wsUrl: wsURL,
-        //       // imToken: "testImToken",
-        //       // testId: data.userId,
-        //     });
-        //   })
-        ctx.$msim
-          .login({
-            // wsUrl: res.data.url,
-            // imToken: res.data.token,
-            wsUrl: wsURL,
-            imToken: "testImToken",
-            testId: data.userId,
+        ctx.$http
+          .post("user/iminit", {
+            uid: data.userId,
+            ctype: 1,
+          })
+          .then((res) => {
+            return ctx.$msim.login({
+              wsUrl: res.data.url,
+              imToken: res.data.token,
+              // wsUrl: wsURL,
+              // imToken: "testImToken",
+              // testId: data.userId,
+            });
           })
           .then(() => {
             loading.close();

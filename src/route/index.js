@@ -46,7 +46,7 @@ const router = createRouter({
       ]
     },
     {
-      path: '/messages/:id',
+      path: '/messages/:conversationID/:uid',
       name: 'messages',
       component: Messages,
     },

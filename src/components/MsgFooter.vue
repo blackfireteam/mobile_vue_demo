@@ -77,7 +77,7 @@ export default {
   props: {
     isHideEmoji: Boolean,
     isHideMore: Boolean,
-    curChat: Object,
+    uid: Number,
   },
   setup(props, context) {
     const ctx = getCurrentInstance().appContext.config.globalProperties;
@@ -140,7 +140,7 @@ export default {
         return ctx.$toast("不能发空消息");
       }
       let msgObj = ctx.$msim.createTextMessage({
-        to: props.curChat.uid,
+        to: props.uid,
         payload: {
           text: data.msgText,
         },
@@ -220,7 +220,7 @@ export default {
           let width = this.width;
           let height = this.height;
           let msgObj = ctx.$msim.createImageMessage({
-            to: props.curChat.uid,
+            to: props.uid,
             payload: {
               height: height,
               width: width,

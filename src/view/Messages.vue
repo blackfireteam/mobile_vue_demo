@@ -1,7 +1,7 @@
 <template>
   <div class="content" @click="hideAll">
     <van-nav-bar
-      :title="curChat?.conversationID"
+      :title="$route.params.conversationID"
       left-arrow
       @click-left="$router.go(-1)"
     />
@@ -17,7 +17,7 @@
           v-for="item in msgList"
           :key="item.msgId"
           :message="item"
-          :isSelf="item.fromUid != curChat?.uid"
+          :isSelf="item.fromUid != $route.params.uid"
           @preview="preview(item)"
           @revoke="revoke"
           @resend="sendRef.resend(item)"
@@ -27,7 +27,7 @@
     <MsgFooter
       :isHideMore="data.isHideMore"
       :isHideEmoji="data.isHideEmoji"
-      :curChat="curChat"
+      :uid="$route.params.uid"
       ref="sendRef"
       @scrollB="scrollBottom"
       @showMore="showMore"
@@ -69,11 +69,9 @@ export default {
     const sendRef = ref("sendRef");
     const route = useRoute();
     const msgList = computed(() => store.state.msgList);
-    const curChat = computed(() => store.state.curChat);
-    if (curChat.value === null) {
-      store.commit("changeChat", {
-        conversationID: route.params.id,
-      });
+    const curConversationID = computed(() => store.state.curConversationID);
+    if (curConversationID.value === null) {
+      store.commit("changeChat", route.params.conversationID);
     }
     const data = reactive({
       loading: false,
@@ -87,9 +85,9 @@ export default {
     let imgMsgIdObj = {};
 
     watch(
-      () => curChat.value,
+      () => curConversationID.value,
       (count, prevCount) => {
-        if (count && count.conversationID !== prevCount?.conversationID) {
+        if (count && count !== prevCount) {
           initMessage();
         }
       }
@@ -133,7 +131,7 @@ export default {
     function initMessage(msgId) {
       ctx.$msim
         .getMessageList({
-          conversationID: curChat.value.conversationID,
+          conversationID: route.params.conversationID,
           msgEnd: msgId,
         })
         .then((res) => {
@@ -206,7 +204,6 @@ export default {
       onLoad,
       preview,
       scrollBottom,
-      curChat: curChat,
       msgList: msgList,
     };
   },

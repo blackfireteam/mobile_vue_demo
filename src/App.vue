@@ -9,7 +9,7 @@ import { useRouter, useRoute } from "vue-router";
 export default {
   name: "App",
   setup() {
-    const { $IM, $msim, $toast } =
+    const { $IM, $msim, $toast, $http } =
       getCurrentInstance().appContext.config.globalProperties;
     const store = useStore();
     const router = useRouter();
@@ -40,25 +40,32 @@ export default {
           duration: 0,
           loadingType: "spinner",
         });
-        $msim
-          .login({
-            // wsUrl: res.data.url,
-            // imToken: res.data.token,
-            wsUrl: wsURL,
-            imToken: "testImToken",
-            testId: userId,
+        $http
+          .post("user/iminit", {
+            uid: userId,
+            ctype: 1,
+          })
+          .then((res) => {
+            console.log(1412);
+            return $msim.login({
+              wsUrl: res.data.url,
+              imToken: res.data.token,
+            });
           })
           .then((loginRes) => {
+            console.log(141);
             loading.close();
             store.commit("setUserId", userId);
             data.isInit = true;
           })
           .catch((err) => {
+            console.log(1415);
             if (err?.msg) {
               $toast(err.msg);
             }
           });
       } else {
+        console.log(1413);
         data.isInit = true;
       }
     }

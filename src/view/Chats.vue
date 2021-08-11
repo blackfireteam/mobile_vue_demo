@@ -99,8 +99,8 @@ export default {
         if (chat.unread > 0) {
           setRead(chat.conversationID);
         }
-        store.commit("changeChat", chat);
-        router.push("/messages/" + chat.conversationID);
+        store.commit("changeChat", chat.conversationID);
+        router.push(`/messages/${chat.conversationID}/${chat.uid}`);
       }
     }
     function setRead(conversationID) {
