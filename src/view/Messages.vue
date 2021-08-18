@@ -47,6 +47,7 @@
 import {
   computed,
   onMounted,
+  onDeactivated,
   getCurrentInstance,
   ref,
   watch,
@@ -118,8 +119,38 @@ export default {
       }
     );
 
+    // 接收消息
+    function received(options) {
+      console.log("接收到消息", options);
+      let curConversationID = route.params.conversationID;
+      let newMsg = options.data[0];
+      if (newMsg.conversationID === curConversationID) {
+        store.commit("updateMsgs", options.data);
+        let uid = route.params.uid;
+        if (newMsg.fromUid == uid || options.data.length > 1) {
+          ctx.$msim.setMessageRead({
+            conversationID: newMsg.conversationID,
+          });
+        }
+      }
+    }
+    // 撤回消息
+    function revoked(options) {
+      console.log("接收到撤回消息", options);
+      let curConversationID = route.params.conversationID;
+      let newMsg = options.data[0];
+      if (newMsg.conversationID === curConversationID) {
+        store.commit("revokeMsgs", options.data);
+      }
+    }
+
     onMounted(() => {
-      // initMessage();
+      ctx.$msim.on(ctx.$IM.EVENT.MESSAGE_RECEIVED, received);
+      ctx.$msim.on(ctx.$IM.EVENT.MESSAGE_REVOKED, revoked);
+    });
+    onDeactivated(() => {
+      ctx.$msim.off(ctx.$IM.EVENT.MESSAGE_RECEIVED);
+      ctx.$msim.off(ctx.$IM.EVENT.MESSAGE_REVOKED);
     });
 
     function preview(item) {

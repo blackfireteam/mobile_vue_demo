@@ -35,7 +35,7 @@
         <van-grid :gutter="10">
           <van-grid-item>
             <van-uploader
-              accept="image/*"
+              :accept="acceptTypes.join()"
               :after-read="afterRead"
               :before-read="beforeRead"
               :max-count="1"
@@ -70,9 +70,9 @@
 </template>
 
 <script>
-import { getCurrentInstance, reactive, nextTick } from "vue";
-import COS from "@/assets/js/cos-js-sdk-v5.min.js";
+import { getCurrentInstance, reactive, nextTick, computed } from "vue";
 import { useStore } from "vuex";
+import cosHooks from "@/hooks/cosHooks";
 export default {
   props: {
     isHideEmoji: Boolean,
@@ -82,18 +82,15 @@ export default {
   setup(props, context) {
     const ctx = getCurrentInstance().appContext.config.globalProperties;
     const store = useStore();
+    const acceptTypes = ["image/jpg", "image/jpeg", "image/gif", "image/png"];
+    const { initCos, getCos } = cosHooks();
     const emojiJson = require("@/assets/emoji/emoji.json");
     const emojiMap = require("@/assets/emoji/emojiMap.json");
     const data = reactive({
       msgText: "",
     });
-
-    let bucket = "msim-1252460681";
-    let region = "ap-chengdu";
-    let cos = new COS({
-      SecretId: "AKIDiARZwekKIK7f18alpjsqdOzmQAplexA5",
-      SecretKey: "f7MLJ3YnoX2KLKBmBeAVeWNVLaYEmGYa",
-    });
+    const cosConfig = computed(() => store.state.cosConfig);
+    const cos = computed(() => store.state.cos);
 
     function clearMsg(e) {
       let strEnd = data.msgText.length;
@@ -146,25 +143,22 @@ export default {
         },
       });
       data.msgText = "";
-      if (msgObj) {
-        sendMsg(msgObj);
-      }
+      store.commit("addMsg", msgObj);
+      context.emit("scrollB");
+      sendMsg(msgObj);
     }
 
     // 发送消息
     function sendMsg(msgObj) {
-      store.commit("addMsg", msgObj);
-      let oldMsg = store.state.msgList[store.state.msgList.length - 1];
-      context.emit("scrollB");
       ctx.$msim
         .sendMessage(msgObj)
         .then((res) => {
-          oldMsg.sendStatus = res.data.sendStatus;
-          oldMsg.msgId = res.data.msgId;
+          msgObj.sendStatus = res.data.sendStatus;
+          msgObj.msgId = res.data.msgId;
         })
         .catch((err) => {
           nextTick(() => {
-            oldMsg.sendStatus =
+            msgObj.sendStatus =
               ctx.$IM.TYPES.SEND_STATE.BFIM_MSG_STATUS_SEND_FAIL;
             return ctx.$toast({
               message: err?.msg || err,
@@ -190,19 +184,14 @@ export default {
         });
     }
 
-    const beforeRead = (file) => {
-      if (
-        file.type === "image/jpg" ||
-        file.type === "image/jpeg" ||
-        file.type === "image/gif" ||
-        file.type === "image/png"
-      ) {
+    function beforeRead(file) {
+      if (acceptTypes.includes(file.type.toLowerCase())) {
         return true;
       } else {
         ctx.$toast("目前只支持jpg,jpeg,png,gif格式文件");
         return false;
       }
-    };
+    }
 
     // 选择图片
     function afterRead(fileObj) {
@@ -224,37 +213,54 @@ export default {
             payload: {
               height: height,
               width: width,
-              url: "",
+              url: e.target.result,
               progress: 0,
             },
           });
-          let name = new Date().getTime();
           context.emit("hide");
-          cos.putObject(
-            {
-              Bucket: bucket /* 必须 */,
-              Region: region /* 存储桶所在地域，必须字段 */,
-              Key: `im_image/${name}.${fileExtension}` /* 必须 */,
-              Body: file,
-              onProgress: (progressData) => {
-                msgObj.progress = progressData.percent * 100;
-              },
-            },
-            (err, data) => {
-              if (data && data.statusCode === 200) {
-                msgObj.url = "https://" + data.Location;
-                if (msgObj) {
-                  sendMsg(msgObj);
-                }
-              }
-            }
-          );
+          store.commit("addMsg", msgObj);
+          if (cos.value) {
+            console.log(141411);
+            putObject(msgObj, fileExtension, file);
+          } else {
+            console.log(111111);
+            getCos((data) => {
+              initCos(data);
+              putObject(msgObj, fileExtension, file);
+            });
+          }
         };
       };
     }
+
+    // 上传图片到云
+    function putObject(msgObj, fileExtension, file) {
+      let name = new Date().getTime();
+      cos.value.putObject(
+        {
+          Bucket: cosConfig.value.bucket /* 必须 */,
+          Region: cosConfig.value.region /* 存储桶所在地域，必须字段 */,
+          Key: `${cosConfig.value.path}/${name}.${fileExtension}` /* 必须 */,
+          Body: file,
+          onProgress: (progressData) => {
+            msgObj.progress = progressData.percent * 100;
+          },
+        },
+        (err, data) => {
+          if (data && data.statusCode === 200) {
+            msgObj.url = "https://" + data.Location;
+            if (msgObj) {
+              sendMsg(msgObj);
+            }
+          }
+        }
+      );
+    }
+
     return {
       data,
       emojiJson,
+      acceptTypes,
       clearMsg,
       selectEmoji,
       sendText,

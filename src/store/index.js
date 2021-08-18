@@ -6,6 +6,8 @@ const store = createStore({
       chatList: [], // 会话列表
       msgList: [], // 消息列表
       curConversationID: null, // 当前会话ID
+      cos: null, // 当前cos
+      cosConfig: null // cos相关配置
     }
   },
   mutations: {
@@ -14,6 +16,14 @@ const store = createStore({
       state.chatList = [];
       state.msgList = [];
       state.curConversationID = null;
+      state.cos = null;
+      state.cosConfig = null;
+    },
+    setCos(state, cos) {
+      state.cos = cos;
+    },
+    setCosConfig(state, data) {
+      state.cosConfig = data;
     },
     setUserId(state, userId) {
       state.curUserId = userId;

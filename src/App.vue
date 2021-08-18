@@ -28,46 +28,47 @@ export default {
       $msim.on($IM.EVENT.KICKED_OUT, kickedOut);
       $msim.on($IM.EVENT.TOKEN_NOT_FOUND, tokenNotFound);
       $msim.on($IM.EVENT.SYNC_CHATS_CHANGE, syncChats);
-      $msim.on($IM.EVENT.MESSAGE_RECEIVED, received);
-      $msim.on($IM.EVENT.MESSAGE_REVOKED, revoked);
       $msim.on($IM.EVENT.CONVERSATION_LIST_UPDATED, updateChats);
       let userId = window.localStorage.getItem("userId") || null;
-      if (userId && route.name !== "login") {
+      if (userId) {
         data.isInit = false;
+        let wsUrL = window.localStorage.getItem("wsUrL");
+        let imToken = window.localStorage.getItem("imToken");
         const loading = $toast.loading({
           message: "登陆中...",
           forbidClick: true,
           duration: 0,
           loadingType: "spinner",
         });
-        $http
-          .post("user/iminit", {
-            uid: userId,
-            ctype: 1,
-          })
-          .then((res) => {
-            console.log(1412);
-            return $msim.login({
-              wsUrl: res.data.url,
-              imToken: res.data.token,
-            });
+        $msim
+          .login({
+            wsUrl: wsUrL,
+            imToken: imToken,
           })
           .then((loginRes) => {
-            console.log(141);
             loading.close();
             store.commit("setUserId", userId);
             data.isInit = true;
           })
           .catch((err) => {
-            console.log(1415);
             if (err?.msg) {
               $toast(err.msg);
             }
           });
       } else {
-        console.log(1413);
+        if (route.name !== "login") {
+          router.push({ name: "login" });
+        }
         data.isInit = true;
       }
+    }
+
+    function clear() {
+      window.localStorage.removeItem("userId");
+      window.localStorage.removeItem("wsUrL");
+      window.localStorage.removeItem("imToken");
+      store.commit("clear");
+      router.push({ name: "login" });
     }
 
     // 网络状态监听
@@ -87,38 +88,22 @@ export default {
     }
     // 退出
     function logout(options) {
-      console.log(options);
-      window.localStorage.removeItem("userId");
-      store.commit("clear");
-      router.push({ name: "login" });
+      console.log("退出成功", options);
+      clear();
     }
     // 被踢
     function kickedOut(options) {
-      console.log(options);
-      window.localStorage.removeItem("userId");
-      store.commit("clear");
-      router.push({ name: "login" });
+      console.log("被踢", options);
+      clear();
     }
     // token失效
     function tokenNotFound(options) {
-      console.log(options);
-      window.localStorage.removeItem("userId");
-      store.commit("clear");
-      router.push({ name: "login" });
+      console.log("token失效", options);
+      clear();
     }
     // 同步会话状态
     function syncChats(options) {
       console.log("同步会话", options);
-    }
-    // 接收消息
-    function received(options) {
-      console.log("接收到消息", options);
-      store.commit("updateMsgs", options.data);
-    }
-    // 撤回消息
-    function revoked(options) {
-      console.log("接收到撤回消息", options);
-      store.commit("revokeMsgs", options.data);
     }
     // 更新会话
     function updateChats(options) {

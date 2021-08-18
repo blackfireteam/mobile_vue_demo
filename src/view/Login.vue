@@ -73,6 +73,7 @@ export default {
         return ctx.$toast("请输入手机号码");
       }
       if (!store.state.curUserId) {
+        let wsURL, imToken;
         const loading = ctx.$toast.loading({
           message: "登陆中...",
           forbidClick: true,
@@ -85,17 +86,18 @@ export default {
             ctype: 1,
           })
           .then((res) => {
+            wsURL = res.data.url;
+            imToken = res.data.token;
             return ctx.$msim.login({
               wsUrl: res.data.url,
               imToken: res.data.token,
-              // wsUrl: wsURL,
-              // imToken: "testImToken",
-              // testId: data.userId,
             });
           })
           .then(() => {
             loading.close();
             window.localStorage.setItem("userId", data.userId);
+            window.localStorage.setItem("wsUrL", wsURL);
+            window.localStorage.setItem("imToken", imToken);
             store.commit("setUserId", data.userId);
             router.push({ name: "chats" });
           })

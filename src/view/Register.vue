@@ -98,9 +98,9 @@ export default {
         });
     }
 
-    const asyncValidator = (val) => {
+    function asyncValidator(val) {
       return val.length > 0;
-    };
+    }
 
     function afterRead(fileObj) {
       return new Promise((resolve, reject) => {
@@ -135,7 +135,7 @@ export default {
         }
       });
     }
-    const beforeRead = (file) => {
+    function beforeRead(file) {
       if (
         file.type === "image/jpg" ||
         file.type === "image/jpeg" ||
@@ -147,7 +147,7 @@ export default {
         ctx.$toast("目前只支持jpg,jpeg,png,gif格式文件");
         return false;
       }
-    };
+    }
     return {
       data,
       fileList,

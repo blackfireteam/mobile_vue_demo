@@ -42,6 +42,9 @@ export default {
         .logout()
         .then((res) => {
           store.commit("clear");
+          window.localStorage.removeItem("userId");
+          window.localStorage.removeItem("wsUrL");
+          window.localStorage.removeItem("imToken");
           router.push({ name: "login" });
         })
         .catch((err) => {
