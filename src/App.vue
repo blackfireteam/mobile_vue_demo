@@ -50,6 +50,7 @@ export default {
             data.isInit = true;
           })
           .catch((err) => {
+            data.isInit = true;
             if (err?.msg) {
               $toast(err.msg);
             }

@@ -2,6 +2,7 @@
 const CompressionWebpackPlugin = require("compression-webpack-plugin")
 //匹配此 {RegExp} 的资源
 const productionGzipExtensions = /\.(js|css|json|txt|html|ico|svg)(\?.*)?$/i;
+const TerserPlugin = require('terser-webpack-plugin')
 
 module.exports = {
   publicPath: './',
@@ -31,6 +32,20 @@ module.exports = {
         minRatio: 0.8 //只有压缩率比这个值小的资源才会被处理
       })
     );
+
+    if (process.env.NODE_ENV === 'production') {
+      config.optimization = {
+        minimizer: [
+          new TerserPlugin({
+            terserOptions: {
+              compress: {
+                drop_console: true,
+              },
+            },
+          }),
+        ],
+      }
+    }
 
     // End 生成 gzip 压缩文件
     config.plugins = [...config.plugins, ...plugins];
