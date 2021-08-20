@@ -220,10 +220,8 @@ export default {
           context.emit("hide");
           store.commit("addMsg", msgObj);
           if (cos.value) {
-            console.log(141411);
             putObject(msgObj, fileExtension, file);
           } else {
-            console.log(111111);
             getCos((data) => {
               initCos(data);
               putObject(msgObj, fileExtension, file);

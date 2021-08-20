@@ -95,14 +95,12 @@ const store = createStore({
     revokeMsgs(state, messages) {
       if (!state.curConversationID) return;
       messages.forEach((newMsg) => {
-        console.log(412421)
         if (newMsg.conversationID === state.curConversationID) {
           let msg = state.msgList.find(
             (msgItem) => msgItem.msgId === newMsg.msgId
           );
           if (msg) {
             Object.assign(msg, newMsg);
-            console.log(41, msg)
           }
         }
       });
@@ -110,7 +108,6 @@ const store = createStore({
     updateMsg(state, msg) {
       let oldMsg = state.msgList.find(msgItem => msgItem.conversationID === msg.conversationID && msgItem.onlyId === msg.onlyId);
       if (oldMsg) {
-        console.log(oldMsg, 14141)
         Object.assign(oldMsg, msg);
       }
     }

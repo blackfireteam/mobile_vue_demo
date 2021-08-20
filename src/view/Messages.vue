@@ -21,6 +21,8 @@
           @preview="preview(item)"
           @revoke="revoke"
           @resend="sendRef.resend(item)"
+          @playSound="playSound"
+          @stopSound="stopSound"
         ></MsgItem>
       </van-list>
     </div>
@@ -74,6 +76,8 @@ export default {
     if (curConversationID.value === null) {
       store.commit("changeChat", route.params.conversationID);
     }
+    let curAudio = null;
+    let soundOptions = null;
     const data = reactive({
       loading: false,
       finished: false,
@@ -149,6 +153,9 @@ export default {
       ctx.$msim.on(ctx.$IM.EVENT.MESSAGE_REVOKED, revoked);
     });
     onDeactivated(() => {
+      if (soundOptions) {
+        stopSound();
+      }
       ctx.$msim.off(ctx.$IM.EVENT.MESSAGE_RECEIVED);
       ctx.$msim.off(ctx.$IM.EVENT.MESSAGE_REVOKED);
     });
@@ -224,6 +231,30 @@ export default {
       if (data.isHideEmoji) data.isHideEmoji = false;
       if (!data.isHideMore) data.isHideMore = true;
     }
+    function playSound(options) {
+      if (soundOptions) {
+        stopSound();
+      }
+      soundOptions = options;
+      curAudio = document.createElement("audio");
+      curAudio.src = options.message.url;
+      options.play();
+      const promise = curAudio.play();
+      curAudio.addEventListener("ended", () => {
+        stopSound();
+      });
+      if (promise) {
+        promise.catch(() => {
+          stopSound();
+        });
+      }
+    }
+    function stopSound() {
+      curAudio.pause();
+      soundOptions.stop();
+      curAudio = null;
+      soundOptions = null;
+    }
     return {
       data,
       msgRef,
@@ -234,6 +265,8 @@ export default {
       revoke,
       onLoad,
       preview,
+      playSound,
+      stopSound,
       scrollBottom,
       msgList: msgList,
     };

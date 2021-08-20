@@ -54,43 +54,33 @@
             :class="isSelf ? 'message_send' : 'message_received'"
             class="message_content"
           >
-            <!-- <span
+            <div
               v-if="message.type === 0"
               class="text_box"
               v-html="handleMsg(message.text)"
-            ></span> -->
-            <!-- src="https://msim-1252460681.cos.ap-chengdu.myqcloud.com/im_voice/F7877F0E-DE80-45F0-BAC3-468BDECC680A.m4a" -->
-            <!-- src="https://msim-1252460681.cos.ap-chengdu.myqcloud.com/im_voice/1628823566.caf" -->
-            <!-- <div v-if="message.type === 0" class="text_box">
-              <audio
-                controls
-                src="https://msim-1252460681.cos.ap-chengdu.myqcloud.com/im_voice/1628823566.caf"
-              >
-                Your browser does not support the
-                <code>audio</code> element.
-              </audio>
-            </div> -->
-            <span
-              v-if="message.type === 0"
-              class="text_box"
-              v-html="handleMsg(message.text)"
-            ></span>
+            ></div>
             <img
               v-else-if="message.type === 1"
               class="image_element"
               @click="$emit('preview')"
               :src="message.url"
             />
-            <span v-else-if="message.type === 2" class="text_box">[音频]</span>
+            <div v-else-if="message.type === 2" class="text_box">
+              <SoundItem
+                :message="message"
+                :isSelf="isSelf"
+                v-bind="$attrs"
+              ></SoundItem>
+            </div>
             <img
               v-else-if="message.type === 3"
               class="image_element"
               :src="message.url"
             />
-            <span v-else-if="message.type === 100" class="text_box"
-              >[自定义消息]</span
-            >
-            <span v-else>{{ message.body }}</span>
+            <div v-else-if="message.type === 100" class="text_box">
+              [自定义消息]
+            </div>
+            <div v-else class="text_box">{{ message.body }}</div>
           </div>
         </div>
         <div class="base" :class="isSelf ? 'right' : 'left'">
@@ -105,7 +95,11 @@
 </template>
 
 <script>
+import SoundItem from "./SoundItem.vue";
 export default {
+  components: {
+    SoundItem,
+  },
   props: {
     message: Object,
     isSelf: Boolean,
@@ -273,8 +267,6 @@ export default {
 }
 
 .text_box {
-  display: inline-block;
-  width: 100%;
   overflow: hidden;
   line-height: 25px;
 }

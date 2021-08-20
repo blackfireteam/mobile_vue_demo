@@ -9,7 +9,7 @@ import { useRouter, useRoute } from "vue-router";
 export default {
   name: "App",
   setup() {
-    const { $IM, $msim, $toast, $http } =
+    const { $IM, $msim, $toast } =
       getCurrentInstance().appContext.config.globalProperties;
     const store = useStore();
     const router = useRouter();
@@ -17,7 +17,6 @@ export default {
     const data = reactive({
       isInit: false,
     });
-    let wsURL = "wss://im.ekfree.com:18988";
     onMounted(() => {
       initListener();
     });
