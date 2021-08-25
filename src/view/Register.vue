@@ -8,7 +8,7 @@
   <div class="register">
     <van-form @submit="register">
       <van-cell-group inset>
-        <van-field
+        <!-- <van-field
           name="uploader"
           label="上传头像"
           :rules="[
@@ -25,7 +25,7 @@
               :max-count="1"
             />
           </template>
-        </van-field>
+        </van-field> -->
         <van-field
           v-model="data.phone"
           type="tel"
@@ -53,7 +53,6 @@
 
 <script>
 import { getCurrentInstance, ref, reactive } from "vue";
-import COS from "@/assets/js/cos-js-sdk-v5.min.js";
 export default {
   setup() {
     const ctx = getCurrentInstance().appContext.config.globalProperties;
@@ -62,12 +61,6 @@ export default {
       nickname: "",
     });
     const fileList = ref([]);
-    let bucket = "msim-1252460681";
-    let region = "ap-chengdu";
-    let cos = new COS({
-      SecretId: "AKIDiARZwekKIK7f18alpjsqdOzmQAplexA5",
-      SecretKey: "f7MLJ3YnoX2KLKBmBeAVeWNVLaYEmGYa",
-    });
     function register() {
       const loading = ctx.$toast.loading({
         message: "提交中...",
@@ -75,21 +68,21 @@ export default {
         duration: 0,
         loadingType: "spinner",
       });
-      afterRead(fileList.value[0])
-        .then((url) => {
-          return ctx.$http.post("user/reg", {
-            uid: data.phone,
-            nick_name: data.nickname,
-            avatar: url,
-            verified: true, // 是否认证
-            gold: true, // 是否是gold
-            gold_exp_time: true, // gold过期时间
-            approved: true, // 是否是过审
-            disabled: true, // 是否disable
-            blocked: true, //	是否block
-            hold: true, // 是否im hold
-            deleted: true, // 是否im deleted
-          });
+      let url =
+        "https://msim-test-1252460681.cos.na-siliconvalley.myqcloud.com/pers/612FA7A3-144E-4978-A75C-9D9277167292.jpeg";
+      ctx.$http
+        .post("user/reg", {
+          uid: data.phone,
+          nick_name: data.nickname,
+          avatar: url,
+          verified: true, // 是否认证
+          gold: true, // 是否是gold
+          gold_exp_time: 0, // gold过期时间
+          approved: true, // 是否是过审
+          disabled: false, // 是否disable
+          blocked: false, //	是否block
+          hold: false, // 是否im hold
+          deleted: false, // 是否im deleted
         })
         .then((res) => {
           loading.close();
@@ -102,57 +95,10 @@ export default {
       return val.length > 0;
     }
 
-    function afterRead(fileObj) {
-      return new Promise((resolve, reject) => {
-        try {
-          fileObj.status = "uploading";
-          fileObj.message = "上传中...";
-          let file = fileObj.file;
-          // im_image
-          // im_video
-          // im_voice
-          let fileExtension = file.type.slice(6).toLowerCase();
-          let name = new Date().getTime();
-          cos.putObject(
-            {
-              Bucket: bucket /* 必须 */,
-              Region: region /* 存储桶所在地域，必须字段 */,
-              Key: `common/${name}.${fileExtension}` /* 必须 */,
-              Body: file,
-            },
-            (err, data) => {
-              if (data && data.statusCode === 200) {
-                fileObj.status = "success";
-                fileObj.message = "上传成功";
-                resolve("https://" + data.Location);
-              } else {
-                reject(err);
-              }
-            }
-          );
-        } catch (err) {
-          reject(err);
-        }
-      });
-    }
-    function beforeRead(file) {
-      if (
-        file.type === "image/jpg" ||
-        file.type === "image/jpeg" ||
-        file.type === "image/gif" ||
-        file.type === "image/png"
-      ) {
-        return true;
-      } else {
-        ctx.$toast("目前只支持jpg,jpeg,png,gif格式文件");
-        return false;
-      }
-    }
     return {
       data,
       fileList,
       register,
-      beforeRead,
       asyncValidator,
     };
   },
