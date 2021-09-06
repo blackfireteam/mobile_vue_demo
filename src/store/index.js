@@ -7,8 +7,8 @@ const store = createStore({
       msgList: [], // 消息列表
       curConversationID: null, // 当前会话ID
       cos: null, // 当前cos
-      cosConfig: null // cos相关配置
-    }
+      cosConfig: null, // cos相关配置
+    };
   },
   mutations: {
     clear(state) {
@@ -45,17 +45,17 @@ const store = createStore({
       chats.forEach((newChat) => {
         if (newChat.deleted) {
           // 如果是删除会话
-          state.chatList = state.chatList.filter(
-            (chat) => {
-              if (newChat.conversationID === state.curConversationID) {
-                state.curConversationID = null;
-              }
-              return chat.conversationID !== newChat.conversationID;
+          state.chatList = state.chatList.filter((chat) => {
+            if (newChat.conversationID === state.curConversationID) {
+              state.curConversationID = null;
             }
-          );
+            return chat.conversationID !== newChat.conversationID;
+          });
         } else {
           // 更新其他会话
-          let oldChat = state.chatList.find(chat => chat.conversationID === newChat.conversationID)
+          let oldChat = state.chatList.find(
+            (chat) => chat.conversationID === newChat.conversationID
+          );
           if (oldChat) {
             Object.assign(oldChat, newChat);
           } else {
@@ -106,12 +106,16 @@ const store = createStore({
       });
     },
     updateMsg(state, msg) {
-      let oldMsg = state.msgList.find(msgItem => msgItem.conversationID === msg.conversationID && msgItem.onlyId === msg.onlyId);
+      let oldMsg = state.msgList.find(
+        (msgItem) =>
+          msgItem.conversationID === msg.conversationID &&
+          msgItem.onlyId === msg.onlyId
+      );
       if (oldMsg) {
         Object.assign(oldMsg, msg);
       }
-    }
-  }
-})
+    },
+  },
+});
 
 export default store;

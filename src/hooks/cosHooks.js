@@ -1,4 +1,4 @@
-import { getCurrentInstance } from 'vue'
+import { getCurrentInstance } from "vue";
 import COS from "@/assets/js/cos-js-sdk-v5.min.js";
 import { useStore } from "vuex";
 
@@ -50,5 +50,5 @@ export default function() {
   return {
     initCos,
     getCos,
-  }
+  };
 }

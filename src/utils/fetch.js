@@ -18,9 +18,9 @@ service.interceptors.request.use(
     let nonce = Math.ceil(Math.random() * 10e9);
     let timestamp = new Date().getTime() * 1000;
     let sig = sha1(secret + nonce + timestamp);
-    config.headers['nonce'] = nonce;
-    config.headers['timestamp'] = timestamp;
-    config.headers['sig'] = sig;
+    config.headers["nonce"] = nonce;
+    config.headers["timestamp"] = timestamp;
+    config.headers["sig"] = sig;
     // config.headers["X-Requested-With"] = "XMLHttpRequest";
     // config["crossDomain"] = true;
     return config;
