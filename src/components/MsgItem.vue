@@ -105,7 +105,7 @@ export default {
     isSelf: Boolean,
   },
   setup() {
-    const emojiMap = require("@/assets/emoji/emojiMap.json");
+    const emojiMap = require("@/assets/json/emojiMap.json");
     function handleMsg(text) {
       let temp = text;
       let html = "";

@@ -72,7 +72,7 @@
 <script>
 import { getCurrentInstance, reactive, nextTick, computed } from "vue";
 import { useStore } from "vuex";
-import cosHooks from "@/hooks/cosHooks";
+import { getCosOptions } from "@/utils/getCos.js";
 export default {
   props: {
     isHideEmoji: Boolean,
@@ -83,9 +83,8 @@ export default {
     const ctx = getCurrentInstance().appContext.config.globalProperties;
     const store = useStore();
     const acceptTypes = ["image/jpg", "image/jpeg", "image/gif", "image/png"];
-    const { initCos, getCos } = cosHooks();
-    const emojiJson = require("@/assets/emoji/emoji.json");
-    const emojiMap = require("@/assets/emoji/emojiMap.json");
+    const emojiJson = require("@/assets/json/emoji.json");
+    const emojiMap = require("@/assets/json/emojiMap.json");
     const data = reactive({
       msgText: "",
     });
@@ -219,27 +218,22 @@ export default {
           });
           context.emit("hide");
           store.commit("addMsg", msgObj);
-          if (cos.value) {
-            putObject(msgObj, fileExtension, file);
-          } else {
-            getCos((data) => {
-              initCos(data);
-              putObject(msgObj, fileExtension, file);
-            });
-          }
+          getCosOptions().then((options) => {
+            uploadFile(msgObj, fileExtension, file, options);
+          });
         };
       };
     }
 
     // 上传图片到云
-    function putObject(msgObj, fileExtension, file) {
+    function uploadFile(msgObj, fileExtension, file, options) {
       let name = new Date().getTime();
-      cos.value.putObject(
+      options.cos.putObject(
         {
-          Bucket: cosConfig.value.bucket /* 必须 */,
-          Region: cosConfig.value.region /* 存储桶所在地域，必须字段 */,
-          Key: `${cosConfig.value.path}/${name}.${fileExtension}` /* 必须 */,
-          Body: file,
+          Bucket: options.cosConfig.bucket /* 必须 */,
+          Region: options.cosConfig.region /* 存储桶所在地域，必须字段 */,
+          Key: `${options.cosConfig.path}/${name}.${fileExtension}` /* 必须 */,
+          Body: file.raw,
           onProgress: (progressData) => {
             msgObj.progress = progressData.percent * 100;
           },
