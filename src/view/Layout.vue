@@ -16,20 +16,20 @@
 </template>
 
 <script>
-import { computed, reactive, ref } from "vue";
+import { computed, reactive, ref, onMounted, getCurrentInstance } from "vue";
 import { useStore } from "vuex";
 export default {
   setup() {
+    const { $msim } = getCurrentInstance().appContext.config.globalProperties;
     const store = useStore();
-    const unreadCount = computed(() => {
-      let count = 0;
-      store.state.chatList.forEach((chat) => {
-        count += chat.unread || 0;
-      });
-      return count || "";
-    });
+    const unreadCount = computed(() => store.state.allUnread || "");
     const data = reactive({
       active: ref(1),
+    });
+    onMounted(() => {
+      $msim.getAllUnreadCount().then((res) => {
+        store.commit("setUnread", res.data.unread);
+      });
     });
     return {
       data,

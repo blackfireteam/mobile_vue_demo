@@ -6,6 +6,7 @@ const store = createStore({
       chatList: [], // 会话列表
       msgList: [], // 消息列表
       curConversationID: null, // 当前会话ID
+      allUnread: 0,
     };
   },
   mutations: {
@@ -14,6 +15,10 @@ const store = createStore({
       state.chatList = [];
       state.msgList = [];
       state.curConversationID = null;
+      state.allUnread = 0;
+    },
+    setUnread(state, allUnread) {
+      state.allUnread = allUnread;
     },
     setUserId(state, userId) {
       state.curUserId = userId;

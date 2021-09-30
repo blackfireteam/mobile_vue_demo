@@ -18,6 +18,7 @@
           :key="item.msgId"
           :message="item"
           :isSelf="item.fromUid != $route.params.uid"
+          :msgLastRead="data.chatInfo?.msgLastRead"
           @preview="preview(item)"
           @revoke="revoke"
           @resend="sendRef.resend(item)"
@@ -86,6 +87,7 @@ export default {
       show: false,
       imageListIndex: 0,
       images: [],
+      chatInfo: null,
     });
     let imgMsgIdObj = {};
 
@@ -149,9 +151,18 @@ export default {
     }
 
     onMounted(() => {
+      ctx.$msim
+        .getConversationProvider({
+          conversationID: route.params.conversationID,
+        })
+        .then((res) => {
+          data.chatInfo = res.data;
+          console.log(res, 1);
+        });
       ctx.$msim.on(ctx.$IM.EVENT.MESSAGE_RECEIVED, received);
       ctx.$msim.on(ctx.$IM.EVENT.MESSAGE_REVOKED, revoked);
     });
+
     onDeactivated(() => {
       if (soundOptions) {
         stopSound();

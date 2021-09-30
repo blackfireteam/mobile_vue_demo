@@ -84,6 +84,9 @@
           </div>
         </div>
         <div class="base" :class="isSelf ? 'right' : 'left'">
+          <div class="is_read" v-show="isSelf && msgLastRead >= message.msgId">
+            已读
+          </div>
           <div class="date">
             {{ new Date(message.showMsgTime).toLocaleString() }}
           </div>
@@ -103,6 +106,10 @@ export default {
   props: {
     message: Object,
     isSelf: Boolean,
+    msgLastRead: {
+      type: Number,
+      default: 0,
+    },
   },
   setup() {
     const emojiMap = require("@/assets/json/emojiMap.json");
@@ -280,6 +287,9 @@ export default {
   color: #a5b5c1;
   font-size: 12px;
   line-height: 16px;
+}
+.is_read {
+  margin-left: 15px;
 }
 
 .right {

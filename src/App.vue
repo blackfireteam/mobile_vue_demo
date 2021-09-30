@@ -3,7 +3,7 @@
 </template>
 
 <script>
-import { getCurrentInstance, onMounted, reactive } from "vue";
+import { getCurrentInstance, onMounted, reactive, nextTick } from "vue";
 import { useStore } from "vuex";
 import { useRouter, useRoute } from "vue-router";
 export default {
@@ -47,13 +47,14 @@ export default {
           .then((loginRes) => {
             loading.close();
             store.commit("setUserId", userId);
-            data.isInit = true;
           })
           .catch((err) => {
-            data.isInit = true;
             if (err?.msg) {
               $toast(err.msg);
             }
+          })
+          .finally(() => {
+            data.isInit = true;
           });
       } else {
         if (route.name !== "login") {
@@ -109,6 +110,10 @@ export default {
     function updateChats(options) {
       console.log("会话列表更新", options.data);
       store.commit("updateChats", options.data);
+      $msim.getAllUnreadCount().then((res) => {
+        console.log(1414, res);
+        store.commit("setUnread", res.data.unread);
+      });
     }
 
     return { data };
