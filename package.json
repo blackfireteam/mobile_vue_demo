@@ -13,7 +13,7 @@
     "core-js": "^3.6.5",
     "js-sha1": "^0.6.0",
     "lib-flexible": "^0.3.2",
-    "msim": "^1.0.15",
+    "msim": "^1.0.24",
     "msim_1_test": "^1.0.19",
     "postcss-pxtorem": "^5.1.1",
     "vant": "^3.1.2",

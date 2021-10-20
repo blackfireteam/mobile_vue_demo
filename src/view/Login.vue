@@ -91,6 +91,7 @@ export default {
             return ctx.$msim.login({
               wsUrl: res.data.url,
               imToken: res.data.token,
+              subAppId: 1,
             });
           })
           .then(() => {

@@ -43,6 +43,7 @@ export default {
           .login({
             wsUrl: wsUrL,
             imToken: imToken,
+            subAppId: 1,
           })
           .then((loginRes) => {
             loading.close();

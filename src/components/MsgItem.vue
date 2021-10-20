@@ -63,6 +63,13 @@
               v-else-if="message.type === 1"
               class="image_element"
               @click="$emit('preview')"
+              :style="{
+                width: message.width > 250 ? '250px' : message.width + 'px',
+                height:
+                  message.width <= 250
+                    ? message.height + 'px'
+                    : (message.height * 250) / message.width + 'px',
+              }"
               :src="message.url"
             />
             <div v-else-if="message.type === 2" class="text_box">
@@ -75,7 +82,14 @@
             <img
               v-else-if="message.type === 3"
               class="image_element"
-              :src="message.url"
+              :style="{
+                width: message.width > 250 ? '250px' : message.width + 'px',
+                height:
+                  message.width <= 250
+                    ? message.height + 'px'
+                    : (message.height * 250) / message.width + 'px',
+              }"
+              :src="message.thumb"
             />
             <div v-else-if="message.type === 100" class="text_box">
               [自定义消息]
