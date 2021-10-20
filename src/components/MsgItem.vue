@@ -64,11 +64,11 @@
               class="image_element"
               @click="$emit('preview')"
               :style="{
-                width: message.width > 250 ? '250px' : message.width + 'px',
+                width: message.width > 180 ? '180px' : message.width + 'px',
                 height:
-                  message.width <= 250
-                    ? message.height + 'px'
-                    : (message.height * 250) / message.width + 'px',
+                  message.width > 180
+                    ? (message.height * 180) / message.width + 'px'
+                    : message.height + 'px',
               }"
               :src="message.url"
             />
@@ -83,11 +83,11 @@
               v-else-if="message.type === 3"
               class="image_element"
               :style="{
-                width: message.width > 250 ? '250px' : message.width + 'px',
+                width: message.width > 180 ? '180px' : message.width + 'px',
                 height:
-                  message.width <= 250
-                    ? message.height + 'px'
-                    : (message.height * 250) / message.width + 'px',
+                  message.width > 180
+                    ? (message.height * 180) / message.width + 'px'
+                    : message.height + 'px',
               }"
               :src="message.thumb"
             />
@@ -233,7 +233,7 @@ export default {
   outline: none;
   font-size: 14px;
   position: relative;
-  max-width: 45vw;
+  max-width: 210px;
   word-wrap: break-word;
   word-break: break-all;
   padding: 5px 10px;
@@ -292,7 +292,7 @@ export default {
   line-height: 25px;
 }
 .image_element {
-  max-width: 40vw;
+  max-width: 200px;
   /* cursor: zoom-in; */
 }
 

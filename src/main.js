@@ -6,15 +6,60 @@ import fetch from "@/utils/fetch";
 import IM from "msim";
 import "lib-flexible";
 import Vant from "vant";
-import { Lazyload } from "vant";
+import {
+  Lazyload,
+  Icon,
+  Image,
+  Field,
+  Button,
+  NavBar,
+  Grid,
+  Uploader,
+  List,
+  PullRefresh,
+  Cell,
+  CellGroup,
+  SwipeCell,
+  Tabbar,
+  TabbarItem,
+  Form,
+  Switch,
+  Toast,
+} from "vant";
 import "vant/lib/index.css";
+
+const components = [
+  Icon,
+  Image,
+  Field,
+  Button,
+  NavBar,
+  Grid,
+  Uploader,
+  List,
+  PullRefresh,
+  Cell,
+  CellGroup,
+  SwipeCell,
+  Tabbar,
+  TabbarItem,
+  Form,
+  Switch,
+];
+const plugins = [Lazyload, Toast];
 
 var app = createApp(App);
 app.config.globalProperties.$IM = IM;
 app.config.globalProperties.$msim = IM.create();
 app.config.globalProperties.$http = fetch;
-app.use(Vant);
-app.use(Lazyload);
+// app.use(Vant);
+// app.use(Lazyload);
+components.forEach((component) => {
+  app.component(component.name, component);
+});
+plugins.forEach((plugin) => {
+  app.use(plugin);
+});
 app.use(store);
 app.use(router);
 app.mount("#app");

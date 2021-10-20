@@ -1,11 +1,11 @@
 import { createRouter, createWebHashHistory } from "vue-router";
-import Login from "../view/Login.vue";
-import Register from "../view/Register.vue";
-import Layout from "../view/Layout.vue";
-import Chats from "../view/Chats.vue";
-import Search from "../view/Search.vue";
-import My from "../view/My.vue";
-import Messages from "../view/Messages.vue";
+// import Login from "../view/Login.vue";
+// import Register from "../view/Register.vue";
+// import Layout from "../view/Layout.vue";
+// import Chats from "../view/Chats.vue";
+// import Search from "../view/Search.vue";
+// import My from "../view/My.vue";
+// import Messages from "../view/Messages.vue";
 
 const routerHistory = createWebHashHistory();
 
@@ -16,40 +16,46 @@ const router = createRouter({
     {
       path: "/",
       name: "login",
-      component: Login,
+      component: () =>
+        import(/* webpackChunkName: "login" */ "@/view/Login.vue"),
     },
     {
       path: "/register",
       name: "register",
-      component: Register,
+      component: () =>
+        import(/* webpackChunkName: "register" */ "@/view/Register.vue"),
     },
     {
       path: "/home",
       name: "home",
-      component: Layout,
+      component: () =>
+        import(/* webpackChunkName: "home" */ "@/view/Layout.vue"),
       redirect: "/chats",
       children: [
         {
           path: "/chats",
           name: "chats",
-          component: Chats,
+          component: () =>
+            import(/* webpackChunkName: "chats" */ "@/view/Chats.vue"),
         },
         {
           path: "/search",
           name: "search",
-          component: Search,
+          component: () =>
+            import(/* webpackChunkName: "search" */ "@/view/Search.vue"),
         },
         {
           path: "/my",
           name: "my",
-          component: My,
+          component: () => import(/* webpackChunkName: "my" */ "@/view/My.vue"),
         },
       ],
     },
     {
       path: "/messages/:conversationID/:uid",
       name: "messages",
-      component: Messages,
+      component: () =>
+        import(/* webpackChunkName: "messages" */ "@/view/Messages.vue"),
     },
   ],
 });
