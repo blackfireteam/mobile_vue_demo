@@ -4,8 +4,8 @@ import router from "./route/index";
 import store from "./store/index";
 import fetch from "@/utils/fetch";
 import IM from "msim";
+// import IM from "@/utils/MSIM";
 import "lib-flexible";
-import Vant from "vant";
 import {
   Lazyload,
   Icon,
@@ -52,8 +52,6 @@ var app = createApp(App);
 app.config.globalProperties.$IM = IM;
 app.config.globalProperties.$msim = IM.create();
 app.config.globalProperties.$http = fetch;
-// app.use(Vant);
-// app.use(Lazyload);
 components.forEach((component) => {
   app.component(component.name, component);
 });

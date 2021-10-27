@@ -14,7 +14,7 @@
     "cos-js-sdk-v5": "^1.2.18",
     "js-sha1": "^0.6.0",
     "lib-flexible": "^0.3.2",
-    "msim": "^1.0.24",
+    "msim": "^1.0.34",
     "msim_1_test": "^1.0.19",
     "postcss-pxtorem": "^5.1.1",
     "vant": "^3.1.2",

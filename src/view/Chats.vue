@@ -64,14 +64,12 @@ export default {
       ctx.$msim
         .getConversationList({
           conversationID: conversationID,
+          pageSize: 20,
         })
         .then((res) => {
           let chats = res.data.chats;
-          if (chats.length > 0) {
-            store.commit("addChats", chats);
-          } else {
-            data.finished = true;
-          }
+          store.commit("addChats", chats);
+          data.finished = !res.data.hasMore;
           data.loading = false;
         })
         .catch((err) => {

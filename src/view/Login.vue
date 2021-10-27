@@ -23,6 +23,7 @@
             :readonly="data.isLogoin"
             placeholder="请输入手机号"
             label-width="1.5rem"
+            maxlength="11"
             label="手机号"
           />
           <van-cell :border="false">

@@ -70,7 +70,7 @@
 </template>
 
 <script>
-import { getCurrentInstance, reactive, nextTick, computed } from "vue";
+import { getCurrentInstance, reactive, nextTick } from "vue";
 import { useStore } from "vuex";
 import { getCosOptions } from "@/utils/getCos.js";
 export default {
@@ -88,8 +88,6 @@ export default {
     const data = reactive({
       msgText: "",
     });
-    const cosConfig = computed(() => store.state.cosConfig);
-    const cos = computed(() => store.state.cos);
 
     function clearMsg(e) {
       let strEnd = data.msgText.length;
@@ -135,16 +133,16 @@ export default {
         data.msgText = "";
         return ctx.$toast("不能发空消息");
       }
-      let msgObj = ctx.$msim.createTextMessage({
+      let result = ctx.$msim.createTextMessage({
         to: props.uid,
         payload: {
           text: data.msgText,
         },
       });
       data.msgText = "";
-      store.commit("addMsg", msgObj);
+      store.commit("addMsg", result.message);
       context.emit("scrollB");
-      sendMsg(msgObj);
+      sendMsg(result.message);
     }
 
     // 发送消息
@@ -207,7 +205,7 @@ export default {
         image.onload = function () {
           let width = this.width;
           let height = this.height;
-          let msgObj = ctx.$msim.createImageMessage({
+          let result = ctx.$msim.createImageMessage({
             to: props.uid,
             payload: {
               height: height,
@@ -217,9 +215,9 @@ export default {
             },
           });
           context.emit("hide");
-          store.commit("addMsg", msgObj);
+          store.commit("addMsg", result.message);
           getCosOptions().then((options) => {
-            uploadFile(msgObj, fileExtension, file, options);
+            uploadFile(result.message, fileExtension, file, options);
           });
         };
       };
