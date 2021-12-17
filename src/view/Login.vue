@@ -138,9 +138,6 @@ export default {
 }
 
 .login_cont {
-  display: flex;
-  align-items: center;
-  flex-direction: column;
   padding-bottom: 20px;
   width: 80vw;
   background: #fff;
@@ -180,7 +177,9 @@ export default {
   color: rgb(51, 51, 51);
 }
 .logo {
+  display: block;
   width: 80px;
   height: 80px;
+  margin: auto;
 }
 </style>

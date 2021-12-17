@@ -49,10 +49,8 @@ const components = [
   Switch,
 ];
 const plugins = [Lazyload, Toast];
-
 var app = createApp(App);
 app.config.globalProperties.$IM = IM;
-app.config.globalProperties.$msim = IM.create();
 app.config.globalProperties.$http = fetch;
 components.forEach((component) => {
   app.component(component.name, component);
@@ -62,4 +60,7 @@ plugins.forEach((plugin) => {
 });
 app.use(store);
 app.use(router);
-app.mount("#app");
+IM.create().then((msim) => {
+  app.config.globalProperties.$msim = msim;
+  app.mount("#app");
+});
