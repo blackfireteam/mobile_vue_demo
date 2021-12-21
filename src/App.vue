@@ -9,7 +9,7 @@ import { useRouter, useRoute } from "vue-router";
 export default {
   name: "App",
   setup() {
-    const { $IM, $msim, $toast } =
+    const { $IM, $msim, $http, $toast } =
       getCurrentInstance().appContext.config.globalProperties;
     const store = useStore();
     const router = useRouter();
@@ -19,6 +19,23 @@ export default {
     });
     onMounted(() => {
       initListener();
+      if (window.localStorage.getItem("userId")) {
+        data.isInit = false;
+        const loading = $toast.loading({
+          message: "登陆中...",
+          forbidClick: true,
+          duration: 0,
+          loadingType: "spinner",
+        });
+        let wsUrL = window.localStorage.getItem("wsUrL");
+        let imToken = window.localStorage.getItem("imToken");
+        loginIm(wsUrL, imToken, loading);
+      } else {
+        if (route.name !== "login") {
+          router.push({ name: "login" });
+        }
+        data.isInit = true;
+      }
     });
     function initListener() {
       $msim.on($IM.EVENT.CONNECT_CHANGE, wsChange);
@@ -28,43 +45,31 @@ export default {
       $msim.on($IM.EVENT.TOKEN_NOT_FOUND, tokenNotFound);
       $msim.on($IM.EVENT.SYNC_CHATS_CHANGE, syncChats);
       $msim.on($IM.EVENT.CONVERSATION_LIST_UPDATED, updateChats);
-      let userId = window.localStorage.getItem("userId") || null;
-      if (userId) {
-        data.isInit = false;
-        let wsUrL = window.localStorage.getItem("wsUrL");
-        let imToken = window.localStorage.getItem("imToken");
-        const loading = $toast.loading({
-          message: "登陆中...",
-          forbidClick: true,
-          duration: 0,
-          loadingType: "spinner",
-        });
-        $msim
-          .login({
-            wsUrl: wsUrL,
-            imToken: imToken,
-            subAppId: 1,
-          })
-          .then((loginRes) => {
-            loading.close();
-            store.commit("setUserId", userId);
-          })
-          .catch((err) => {
-            if (err?.msg) {
-              $toast(err.msg);
-            }
-          })
-          .finally(() => {
-            data.isInit = true;
-          });
-      } else {
-        if (route.name !== "login") {
-          router.push({ name: "login" });
-        }
-        data.isInit = true;
-      }
     }
 
+    function loginIm(wsUrL, imToken, loading) {
+      $msim
+        .login({
+          wsUrl: wsUrL,
+          imToken: imToken,
+          subAppId: 1,
+        })
+        .then((loginRes) => {
+          window.localStorage.setItem("userId", loginRes.data.uid);
+          window.localStorage.setItem("wsUrL", wsUrL);
+          window.localStorage.setItem("imToken", imToken);
+          store.commit("setUserId", loginRes.data.uid);
+          data.isInit = true;
+          loading.close();
+        })
+        .catch((err) => {
+          console.log(1111, err);
+          if (err.code !== 4) {
+            data.isInit = true;
+          }
+          loading.close();
+        });
+    }
     function clear() {
       window.localStorage.removeItem("userId");
       window.localStorage.removeItem("wsUrL");
@@ -101,7 +106,27 @@ export default {
     // token失效
     function tokenNotFound(options) {
       console.log("token失效", options);
-      clear();
+      let userId = window.localStorage.getItem("userId");
+      if (userId) {
+        const loading = $toast.loading({
+          message: "登陆中...",
+          forbidClick: true,
+          duration: 0,
+          loadingType: "spinner",
+        });
+        $http
+          .post("user/iminit", {
+            uid: userId,
+            ctype: 1,
+          })
+          .then((res) => {
+            loginIm(res.data.url, res.data.token, loading);
+          })
+          .catch((err) => {
+            data.isInit = true;
+            loading.close();
+          });
+      }
     }
     // 同步会话状态
     function syncChats(options) {
