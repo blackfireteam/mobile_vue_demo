@@ -61,6 +61,6 @@ plugins.forEach((plugin) => {
 app.use(store);
 app.use(router);
 IM.create().then((msim) => {
-  app.config.globalProperties.$msim = msim;
+  window.$msim = app.config.globalProperties.$msim = msim;
   app.mount("#app");
 });
